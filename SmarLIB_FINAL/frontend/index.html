@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Library Management System</title>
+<style>
+/* ═══════════════════ THEMES ══════════════════════════════ */
+[data-theme="dark"]{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3249;
+  --text:#e8eaf0;--muted:#8b90a7;--accent:#6c5ce7;--green:#00b894;
+  --red:#e17055;--warn:#fdcb6e;--info:#0984e3;
+  --card:#22263a;--input:#22263a;--logo:#a29bfe;--shadow:rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#f0f2f8;--surface:#ffffff;--surface2:#f5f6fc;--border:#d4d8ee;
+  --text:#1a1d2e;--muted:#6b7080;--accent:#5a4ed1;--green:#00956e;
+  --red:#c94f33;--warn:#c9930a;--info:#0869c0;
+  --card:#f5f6fc;--input:#eef0f8;--logo:#5a4ed1;--shadow:rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .2s,color .2s}
+code{font-family:'Courier New',monospace}
+
+/* LOGIN */
+#loginPage{position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:44px 48px;width:360px;box-shadow:0 24px 60px var(--shadow)}
+.login-card h2{font-size:22px;font-weight:800;margin-bottom:5px}
+.login-card p{font-size:13px;color:var(--muted);margin-bottom:28px}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.fld input{width:100%;padding:11px 14px;background:var(--input);
+  border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-size:14px;outline:none;transition:.2s}
+.fld input:focus{border-color:var(--accent)}
+.login-btn{width:100%;padding:12px;background:var(--accent);color:#fff;
+  border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+.login-btn:hover{opacity:.88}
+.login-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
+
+/* SIDEBAR */
+#sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100}
+.s-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.s-logo h1{font-size:15px;font-weight:800;color:var(--logo);letter-spacing:.4px}
+.s-logo p{font-size:11px;color:var(--muted);margin-top:3px}
+.s-sect{padding:16px 16px 4px;font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;
+  margin:2px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);
+  border:none;background:none;width:calc(100% - 16px);text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(108,92,231,.14);color:var(--accent);font-weight:700}
+.nav-item .ic{font-size:16px;width:20px;text-align:center}
+.s-bot{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.th-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 12px;border-radius:8px;background:var(--surface2);
+  border:1px solid var(--border);margin-bottom:10px;cursor:pointer}
+.th-row span{font-size:12px;color:var(--muted);font-weight:600}
+.tt{width:36px;height:20px;background:var(--accent);border-radius:10px;
+  position:relative;flex-shrink:0;transition:.25s}
+.tt.off{background:var(--border)}
+.tk{position:absolute;top:3px;left:3px;width:14px;height:14px;
+  background:#fff;border-radius:50%;transition:.25s}
+.tt .tk{left:19px}.tt.off .tk{left:3px}
+.spill{display:flex;align-items:center;gap:7px;padding:7px 10px;
+  border-radius:7px;background:var(--surface2);border:1px solid var(--border);
+  font-size:12px;margin-bottom:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.g{background:var(--green)}.dot.r{background:var(--red)}
+.logout-btn{width:100%;padding:9px;border-radius:8px;
+  background:rgba(225,112,85,.12);color:var(--red);
+  border:1px solid rgba(225,112,85,.22);cursor:pointer;
+  font-size:13px;font-weight:700;margin-top:4px}
+.logout-btn:hover{background:rgba(225,112,85,.22)}
+
+/* MAIN */
+#main{margin-left:220px;min-height:100vh;display:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar h2{font-size:17px;font-weight:700}
+#clock{font-size:13px;color:var(--muted)}
+.page{display:none;padding:24px 28px;animation:fi .2s ease}
+.page.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px}
+.sc .sl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:10px}
+.sc .sv{font-size:30px;font-weight:800;line-height:1}
+.sc .ss{font-size:12px;color:var(--muted);margin-top:6px}
+.cv .sv{color:var(--accent)}.cg .sv{color:var(--green)}
+.cr .sv{color:var(--red)}.ci .sv{color:var(--info)}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:22px;margin-bottom:18px}
+.ptit{font-size:11px;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.7px;margin-bottom:16px}
+
+/* UPLOAD */
+.upzone{border:2px dashed var(--border);border-radius:10px;padding:28px;
+  text-align:center;cursor:pointer;margin-bottom:14px;transition:.2s}
+.upzone:hover,.upzone.drag{border-color:var(--accent);background:rgba(108,92,231,.05)}
+.uzi{font-size:32px;margin-bottom:8px}
+.upzone p{font-size:14px;color:var(--muted)}
+.upzone span{font-size:12px;color:var(--accent);font-weight:700}
+
+/* BUTTONS */
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:13px;
+  font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{opacity:.87}
+.btn-p{background:var(--accent);color:#fff}
+.btn-g{background:var(--green);color:#fff}
+.btn-o{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-sm{padding:7px 13px;font-size:12px}
+
+/* IMAGES */
+.imgwrap{display:none;margin-bottom:14px;border-radius:10px;
+  overflow:hidden;border:1px solid var(--border)}
+.imgwrap img{width:100%;max-height:400px;object-fit:contain;background:#000;display:block}
+.imglbl{padding:7px 14px;font-size:12px;font-weight:700;
+  background:var(--surface2);color:var(--muted)}
+#ann-wrap .imglbl{background:var(--green);color:#fff}
+#shelf-badge{display:none;margin-bottom:14px;padding:10px 16px;border-radius:8px;
+  font-size:13px;font-weight:700;background:rgba(108,92,231,.12);
+  border:1px solid rgba(108,92,231,.3);color:var(--accent)}
+#scan-status{font-size:13px;color:var(--muted);padding:10px 14px;
+  background:var(--surface2);border-radius:8px;margin:10px 0;display:none}
+#scan-status.show{display:block}
+#cam-status{font-size:13px;color:var(--muted);padding:10px 14px;
+  background:var(--surface2);border-radius:8px;margin:10px 0;display:none}
+#cam-status.show{display:block}
+
+/* RESULT CARDS */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:13px;margin-top:14px}
+.rcard{background:var(--card);border-radius:10px;padding:14px 16px;
+  border-left:5px solid var(--muted);transition:.18s}
+.rcard:hover{transform:translateY(-2px)}
+.rcard.ok{border-left-color:var(--green)}
+.rcard.wrong{border-left-color:var(--red);background:rgba(225,112,85,.07)}
+.rcard.unk{border-left-color:var(--warn)}
+.rcard .rt{font-size:14px;font-weight:700;margin-bottom:5px;
+  display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;line-height:1.3}
+.rcard .rm{font-size:12px;color:var(--muted);line-height:1.85}
+.rcard .rm strong{color:var(--text)}
+
+/* BADGES */
+.bdg{display:inline-block;padding:2px 7px;border-radius:5px;
+  font-size:10px;font-weight:800;letter-spacing:.4px;flex-shrink:0}
+.b-ocr{background:rgba(108,92,231,.2);color:var(--accent)}
+.b-rfid{background:rgba(0,184,148,.2);color:var(--green)}
+.b-ok{background:rgba(0,184,148,.2);color:var(--green)}
+.b-wr{background:rgba(225,112,85,.2);color:var(--red)}
+.b-un{background:rgba(253,203,110,.2);color:var(--warn)}
+.b-yl{background:rgba(9,132,227,.2);color:var(--info)}
+.b-fb{background:rgba(253,203,110,.15);color:var(--warn)}
+.b-cam{background:rgba(108,92,231,.2);color:var(--accent)}
+
+/* RFID FORM */
+.rform{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px}
+.fg input{padding:10px 14px;background:var(--input);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:13px;outline:none;width:170px}
+.fg input:focus{border-color:var(--accent)}
+
+/* LOG */
+.logp{background:var(--surface2);border-radius:8px;font-family:'Courier New',monospace;
+  font-size:12px;padding:12px 14px;height:150px;overflow-y:auto;border:1px solid var(--border)}
+.le{padding:2px 0;border-bottom:1px solid rgba(128,128,128,.1)}
+.lok{color:var(--green)}.lwr{color:var(--red)}.lin{color:var(--info)}.lwn{color:var(--warn)}
+
+/* TABLE */
+.dt{width:100%;border-collapse:collapse;font-size:13px}
+.dt th{padding:10px 13px;text-align:left;font-size:11px;font-weight:700;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.5px;
+  border-bottom:1px solid var(--border)}
+.dt td{padding:11px 13px;border-bottom:1px solid var(--border)}
+.dt tr:hover td{background:rgba(108,92,231,.04)}
+.tok{color:var(--green);font-weight:700}.twr{color:var(--red);font-weight:700}
+
+/* ALERT BOX */
+.abox{display:flex;gap:13px;padding:14px;border-radius:10px;
+  margin-bottom:10px;border:1px solid}
+.abox.danger{background:rgba(225,112,85,.07);border-color:rgba(225,112,85,.25)}
+.abox.info{background:rgba(9,132,227,.07);border-color:rgba(9,132,227,.2)}
+.abox .ai{font-size:20px;flex-shrink:0}
+.abox .at{font-size:13px;font-weight:700;margin-bottom:3px}
+.abox.danger .at{color:var(--red)}.abox.info .at{color:var(--info)}
+.abox .ab{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* SHELF MAP */
+.shgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.shcard{border-radius:10px;padding:16px;background:var(--surface);
+  border:1px solid var(--border)}
+.shcard:hover{border-color:var(--accent)}
+.shid{font-size:22px;font-weight:800;color:var(--accent);margin-bottom:3px}
+.shcat{font-size:12px;color:var(--muted);margin-bottom:10px}
+.shbar{height:5px;border-radius:3px;background:var(--border);overflow:hidden}
+.shfill{height:100%;border-radius:3px;background:var(--green)}
+.shcnt{font-size:11px;color:var(--muted);margin-top:6px}
+
+/* HOME CARDS */
+.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.hcard{background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:20px;cursor:pointer;display:flex;align-items:center;gap:14px}
+.hcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+.hci{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:22px;flex-shrink:0}
+.hct{font-size:14px;font-weight:700;margin-bottom:3px}
+.hcd{font-size:12px;color:var(--muted)}
+
+/* SPINNER */
+.sp{display:inline-block;width:15px;height:15px;border:2px solid rgba(128,128,128,.3);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;
+  vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SCAN TAB SWITCHER */
+.scan-tabs{display:flex;gap:8px;margin-bottom:16px}
+
+/* CAMERA VIDEO */
+#cam-video{width:100%;max-height:420px;display:block;object-fit:cover}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ════════ LOGIN ════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <h2>📚 Smart Library</h2>
+    <p>Management System — Admin Portal</p>
+    <div class="fld"><label>Username</label>
+      <input id="lu" type="text" placeholder="admin" autocomplete="off"></div>
+    <div class="fld"><label>Password</label>
+      <input id="lp" type="password" placeholder="••••"
+             onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="login-hint">Default: admin / 1234</p>
+  </div>
+</div>
+
+<!-- ════════ SIDEBAR ════════ -->
+<div id="sidebar">
+  <div class="s-logo"><h1>📚 SmartLib</h1><p>Detection System v5.0</p></div>
+  <div class="s-sect">Main</div>
+  <button class="nav-item active" onclick="nav('home',this)">
+    <span class="ic">🏠</span> Dashboard</button>
+  <button class="nav-item" onclick="nav('scan',this)">
+    <span class="ic">📸</span> Camera Scan</button>
+  <button class="nav-item" onclick="nav('rfid',this)">
+    <span class="ic">📡</span> RFID Scan</button>
+  <button class="nav-item" onclick="nav('mis',this)">
+    <span class="ic">⚠️</span> Misplaced Books</button>
+  <div class="s-sect">Library</div>
+  <button class="nav-item" onclick="nav('shelves',this)">
+    <span class="ic">📍</span> Shelf Map</button>
+  <button class="nav-item" onclick="nav('reg',this)">
+    <span class="ic">📋</span> RFID Registry</button>
+
+  <div class="s-bot">
+    <div class="th-row" onclick="toggleTheme()">
+      <span id="th-lbl">🌙 Dark Mode</span>
+      <div class="tt" id="ttrack"><div class="tk"></div></div>
+    </div>
+    <div class="spill"><div class="dot" id="py-dot"></div><span id="py-st">Python :5001</span></div>
+    <div class="spill"><div class="dot" id="jv-dot"></div><span id="jv-st">Java :8080</span></div>
+    <button class="logout-btn" onclick="location.reload()">Sign Out</button>
+  </div>
+</div>
+
+<!-- ════════ MAIN ════════ -->
+<div id="main">
+  <div class="topbar">
+    <h2 id="ptitle">Dashboard</h2>
+    <span id="clock"></span>
+  </div>
+
+  <!-- ── HOME ── -->
+  <div class="page active" id="page-home">
+    <div class="stats-row">
+      <div class="sc cv"><div class="sl">RFID Books</div>
+        <div class="sv" id="s-total">—</div><div class="ss">In MySQL</div></div>
+      <div class="sc cr"><div class="sl">Misplaced</div>
+        <div class="sv" id="s-wrong">0</div><div class="ss">Wrong shelf</div></div>
+      <div class="sc cg"><div class="sl">Correct</div>
+        <div class="sv" id="s-ok">0</div><div class="ss">Right shelf</div></div>
+      <div class="sc ci"><div class="sl">Last Scan</div>
+        <div class="sv" id="s-scan" style="font-size:18px">—</div><div class="ss">Method</div></div>
+    </div>
+    <div class="hgrid">
+      <div class="hcard" onclick="goTo('scan')">
+        <div class="hci" style="background:rgba(108,92,231,.14)">📸</div>
+        <div><div class="hct">Camera Scan</div>
+          <div class="hcd">Live camera or upload — YOLO + OCR</div></div>
+      </div>
+      <div class="hcard" onclick="goTo('rfid')">
+        <div class="hci" style="background:rgba(0,184,148,.14)">📡</div>
+        <div><div class="hct">RFID Lookup</div>
+          <div class="hcd">ESP32 hardware or manual UID</div></div>
+      </div>
+      <div class="hcard" onclick="goTo('mis')">
+        <div class="hci" style="background:rgba(225,112,85,.14)">⚠️</div>
+        <div><div class="hct">Misplaced Books</div>
+          <div class="hcd">Compare detected vs expected shelf</div></div>
+      </div>
+    </div>
+    <div class="panel"><div class="ptit">Recent Activity</div>
+      <div class="logp" id="home-log">
+        <div class="le lin">System ready — waiting for first scan...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CAMERA SCAN ── -->
+  <div class="page" id="page-scan">
+
+    <!-- Tab switcher -->
+    <div class="scan-tabs">
+      <button class="btn btn-p btn-sm" id="tab-camera" onclick="switchScanTab('camera')">📷 Live Camera</button>
+      <button class="btn btn-o btn-sm" id="tab-upload" onclick="switchScanTab('upload')">📂 Upload Image</button>
+    </div>
+
+    <!-- LIVE CAMERA PANEL -->
+    <div class="panel" id="cam-panel">
+      <div class="ptit">📷 Live Camera Scan — Point at shelf and capture</div>
+      <div style="position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:14px;max-height:420px">
+        <video id="cam-video" autoplay playsinline muted></video>
+        <canvas id="cam-canvas" style="display:none"></canvas>
+        <!-- Overlay guide -->
+        <div id="cam-guide" style="display:none;position:absolute;inset:0;pointer-events:none">
+          <div style="position:absolute;bottom:12%;left:5%;right:5%;height:22%;border:2px solid rgba(0,255,120,.7);border-radius:6px"></div>
+          <div style="position:absolute;bottom:calc(12% + 26px);left:50%;transform:translateX(-50%);
+                      background:rgba(0,0,0,.55);color:#0f0;font-size:11px;padding:2px 8px;border-radius:4px;
+                      font-family:monospace;white-space:nowrap">Align label stickers here</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-g" id="start-cam-btn" onclick="startCamera()">▶ Start Camera</button>
+        <button class="btn btn-p" id="capture-btn" onclick="captureAndScan()" style="display:none">📸 Capture &amp; Scan</button>
+        <button class="btn btn-o btn-sm" id="stop-cam-btn" onclick="stopCamera()" style="display:none">■ Stop</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">
+        Hold the camera steady so label stickers at the bottom of the spines are visible.
+        The green zone shows the ideal capture area.
+      </p>
+      <div id="cam-status"></div>
+    </div>
+
+    <!-- UPLOAD PANEL -->
+    <div class="panel" id="upload-panel" style="display:none">
+      <div class="ptit">📂 Upload Image — YOLO + OCR (Shelf auto-detected)</div>
+      <div class="upzone" id="upzone"
+           onclick="document.getElementById('imgFile').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="onDrop(event)">
+        <div class="uzi">📂</div>
+        <p id="uptext">Click or drag a shelf photo here</p>
+        <span>YOLO detects books • OCR reads codes • Shelf detected automatically</span>
+        <input type="file" id="imgFile" accept="image/*" style="display:none"
+               onchange="onFile(this)">
+      </div>
+      <div class="imgwrap" id="prev-wrap">
+        <div class="imglbl">Original Image</div>
+        <img id="prev-img" src="" alt="preview">
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-p" onclick="doScan()">🔍 Detect Books</button>
+        <button class="btn btn-o btn-sm" onclick="clearScan()">Clear</button>
+      </div>
+      <div id="scan-status"></div>
+    </div>
+
+    <!-- Shared results area (both camera and upload feed here) -->
+    <div id="shelf-badge">📍 Auto-detected shelf: <span id="detected-shelf-val">—</span></div>
+    <div class="imgwrap" id="ann-wrap">
+      <div class="imglbl">✅ Detection Result — Green = correct shelf &nbsp;|&nbsp; Red = misplaced</div>
+      <img id="ann-img" src="" alt="annotated">
+    </div>
+    <div id="scan-results"></div>
+  </div>
+
+  <!-- ── RFID SCAN ── -->
+  <div class="page" id="page-rfid">
+    <div class="panel">
+      <div class="ptit">📡 RFID Book Lookup</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:18px">
+        Enter UID + shelf to check placement. ESP32 calls <code>/api/scan</code> automatically.
+        Both Camera Scan and RFID Scan now use the same unified <code>books</code> table.
+      </p>
+      <div class="rform">
+        <div class="fg"><label>RFID Tag UID</label>
+          <input id="r-uid" type="text" placeholder="e.g. FA7819C1"
+                 oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="fg"><label>Current Shelf</label>
+          <input id="r-shelf" type="text" placeholder="e.g. A1"
+                 oninput="this.value=this.value.toUpperCase()" value="A1"></div>
+        <button class="btn btn-g" onclick="doRfid()">🔎 Check Book</button>
+      </div>
+      <div id="rfid-result"></div>
+    </div>
+    <div class="panel"><div class="ptit">📟 ESP32 Live Log</div>
+      <div class="logp" id="rfid-log">
+        <div class="le lin">Waiting for ESP32 scans...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MISPLACED BOOKS ── -->
+  <div class="page" id="page-mis">
+    <div class="abox info" style="margin-bottom:18px">
+      <div class="ai">💡</div>
+      <div>
+        <div class="at">Auto Misplacement Detection</div>
+        <div class="ab">
+          The system scans the image with YOLO + OCR, then determines which shelf the photo
+          belongs to by <strong>majority vote</strong> of detected books' expected shelves.
+          Books whose expected shelf differs from the majority are marked
+          <strong style="color:var(--red)">WRONG</strong>. Both Camera and RFID scans feed
+          this table using the same unified database.
+        </div>
+      </div>
+    </div>
+    <div id="mis-empty" class="panel" style="text-align:center;padding:40px">
+      <div style="font-size:36px;margin-bottom:10px">📚</div>
+      <div style="color:var(--muted)">No results yet — run a Camera Scan or RFID Lookup first</div>
+    </div>
+    <div id="mis-content" style="display:none">
+      <div class="panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="ptit" style="margin:0">Detected Books — Shelf Comparison</div>
+          <button class="btn btn-o btn-sm" onclick="clearMis()">Clear</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="dt"><thead><tr>
+            <th>Title</th><th>Book #</th><th>Author</th><th>Programme</th>
+            <th>Method</th><th>Detected Shelf</th><th>Expected</th><th>Rack</th><th>Status</th>
+          </tr></thead>
+          <tbody id="mis-tbody"></tbody></table>
+        </div>
+      </div>
+      <div id="mis-alerts"></div>
+    </div>
+  </div>
+
+  <!-- ── SHELF MAP ── -->
+  <div class="page" id="page-shelves">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:14px">Shelf Map</h3>
+    <div class="shgrid" id="shgrid"></div>
+  </div>
+
+  <!-- ── RFID REGISTRY ── -->
+  <div class="page" id="page-reg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 style="font-size:16px;font-weight:700">📋 Book Registry (RFID + Camera)</h3>
+      <button class="btn btn-g btn-sm" onclick="loadReg()">🔄 Refresh</button>
+    </div>
+    <div class="panel" style="margin-bottom:12px;font-size:13px;color:var(--muted)">
+      Shows all books with RFID stickers assigned. Books without stickers show <code>—</code> for UID.
+      Camera Scan uses <strong>Book Number</strong>; RFID Scan uses <strong>RFID UID</strong> — both from the same table.
+    </div>
+    <div class="panel"><div id="reg-wrap">
+      <p style="color:var(--muted);font-size:13px">Click Refresh to load from MySQL.</p>
+    </div></div>
+  </div>
+</div><!-- /#main -->
+
+<script>
+// ── ENDPOINTS ────────────────────────────────────────────────
+const JAVA   = 'http://localhost:8080/api';
+const PYTHON = 'http://127.0.0.1:5001';
+
+// ── HEALTH CHECK ─────────────────────────────────────────────
+let _healthInterval = null;
+
+async function chkHealth() {
+  const set = (id, ok, lbl) => {
+    const dot = document.getElementById(id + '-dot');
+    const st  = document.getElementById(id + '-st');
+    if (dot) dot.className = 'dot ' + (ok ? 'g' : 'r');
+    if (st)  st.textContent = lbl;
+  };
+  try {
+    const r = await fetch(PYTHON + '/health', { signal: AbortSignal.timeout(3000), mode: 'cors' });
+    if (r.ok) {
+      const d = await r.json();
+      set('py', true, 'Python :5001 ✓ (' + d.books_loaded + ' books)');
+    } else { set('py', false, 'Python :5001 ✗'); }
+  } catch { set('py', false, 'Python :5001 ✗'); }
+
+  try {
+    const r = await fetch(JAVA + '/test', { signal: AbortSignal.timeout(3000), mode: 'cors' });
+    set('jv', r.ok, 'Java :8080' + (r.ok ? ' ✓' : ' ✗'));
+  } catch { set('jv', false, 'Java :8080 ✗'); }
+}
+
+// ── THEME ────────────────────────────────────────────────────
+let dark = true;
+function toggleTheme() {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('th-lbl').textContent = dark ? '🌙 Dark Mode' : '☀️ Light Mode';
+  document.getElementById('ttrack').className = dark ? 'tt' : 'tt off';
+}
+
+// ── AUTH ─────────────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('lu').value;
+  const p = document.getElementById('lp').value;
+  if (u === 'admin' && p === '1234') {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    init();
+  } else {
+    const inp = document.getElementById('lp');
+    inp.style.borderColor = 'var(--red)';
+    setTimeout(() => inp.style.borderColor = '', 1500);
+  }
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────
+const TITLES = {
+  home: 'Dashboard', scan: 'Camera Scan (YOLO + OCR)',
+  rfid: 'RFID Scan', mis: 'Misplaced Books',
+  shelves: 'Shelf Map', reg: 'Book Registry'
+};
+function nav(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('ptitle').textContent = TITLES[id] || id;
+  if (id === 'reg')     loadReg();
+  if (id === 'shelves') loadShelves();
+  if (id === 'home')    loadStats();
+  // Stop camera if navigating away from scan page
+  if (id !== 'scan')    stopCamera();
+}
+function goTo(id) {
+  const map = { home: 0, scan: 1, rfid: 2, mis: 3, shelves: 4, reg: 5 };
+  nav(id, [...document.querySelectorAll('.nav-item')][map[id]]);
+}
+
+// ── CLOCK ────────────────────────────────────────────────────
+function initClock() {
+  setInterval(() => {
+    const el = document.getElementById('clock');
+    if (el) el.textContent = new Date().toLocaleTimeString();
+  }, 1000);
+}
+
+// ── STATS ─────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(JAVA + '/rfid/books', { mode: 'cors' });
+    if (r.ok) {
+      const books = await r.json();
+      const el = document.getElementById('s-total');
+      if (el) el.textContent = books.length;
+    }
+  } catch { /* backend offline */ }
+}
+function updStats() {
+  const ew = document.getElementById('s-wrong');
+  const eo = document.getElementById('s-ok');
+  if (ew) ew.textContent = misRows.filter(r => r.status === 'WRONG').length;
+  if (eo) eo.textContent = misRows.filter(r => r.status === 'OK').length;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCAN TAB SWITCHER
+// ══════════════════════════════════════════════════════════════
+function switchScanTab(tab) {
+  const isCamera = tab === 'camera';
+  document.getElementById('cam-panel').style.display    = isCamera ? 'block' : 'none';
+  document.getElementById('upload-panel').style.display = isCamera ? 'none'  : 'block';
+  document.getElementById('tab-camera').className = 'btn btn-sm ' + (isCamera ? 'btn-p' : 'btn-o');
+  document.getElementById('tab-upload').className = 'btn btn-sm ' + (isCamera ? 'btn-o' : 'btn-p');
+  // Clear shared results when switching tabs
+  document.getElementById('ann-wrap').style.display    = 'none';
+  document.getElementById('shelf-badge').style.display = 'none';
+  document.getElementById('scan-results').innerHTML    = '';
+  if (!isCamera) stopCamera();
+}
+
+// ══════════════════════════════════════════════════════════════
+// LIVE CAMERA SCAN
+// ══════════════════════════════════════════════════════════════
+let _camStream = null;
+
+async function startCamera() {
+  try {
+    _camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
+    const vid = document.getElementById('cam-video');
+    vid.srcObject = _camStream;
+    document.getElementById('start-cam-btn').style.display  = 'none';
+    document.getElementById('capture-btn').style.display    = 'inline-flex';
+    document.getElementById('stop-cam-btn').style.display   = 'inline-flex';
+    document.getElementById('cam-guide').style.display      = 'block';
+    setCamSt('');
+  } catch (e) {
+    setCamSt('❌ Camera access denied. Allow camera in browser settings and try again.');
+  }
+}
+
+function stopCamera() {
+  if (_camStream) { _camStream.getTracks().forEach(t => t.stop()); _camStream = null; }
+  const vid = document.getElementById('cam-video');
+  if (vid) vid.srcObject = null;
+  const sb = document.getElementById('start-cam-btn');
+  const cb = document.getElementById('capture-btn');
+  const stb = document.getElementById('stop-cam-btn');
+  const cg = document.getElementById('cam-guide');
+  if (sb)  sb.style.display  = 'inline-flex';
+  if (cb)  cb.style.display  = 'none';
+  if (stb) stb.style.display = 'none';
+  if (cg)  cg.style.display  = 'none';
+}
+
+async function captureAndScan() {
+  const vid    = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  if (!_camStream || vid.readyState < 2) {
+    setCamSt('⚠️ Camera not ready yet — wait a moment and try again.'); return;
+  }
+  canvas.width  = vid.videoWidth;
+  canvas.height = vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid, 0, 0);
+
+  document.getElementById('ann-wrap').style.display    = 'none';
+  document.getElementById('shelf-badge').style.display = 'none';
+  document.getElementById('scan-results').innerHTML    = '';
+  setCamSt('<span class="sp"></span> Captured! Running YOLO + OCR…');
+
+  canvas.toBlob(async (blob) => {
+    try {
+      const fd = new FormData();
+      fd.append('image', blob, 'capture.jpg');
+      const r = await fetch(PYTHON + '/process-image', { method: 'POST', body: fd });
+      if (!r.ok) { setCamSt('❌ Python server error: ' + r.status); return; }
+      const d = await r.json();
+      if (d.error) { setCamSt('❌ ' + d.error); return; }
+
+      if (d.annotated_image) {
+        document.getElementById('ann-img').src = 'data:image/jpeg;base64,' + d.annotated_image;
+        document.getElementById('ann-wrap').style.display = 'block';
+      }
+      const shelf = d.detectedShelf || 'UNKNOWN';
+      if (shelf !== 'UNKNOWN') {
+        document.getElementById('detected-shelf-val').textContent = shelf;
+        document.getElementById('shelf-badge').style.display = 'block';
+      }
+
+      const books   = d.books || [];
+      const det     = d.detections || 0;
+      const cnt     = (d.codes || []).length;
+      const matched = books.filter(b => b.found).length;
+
+      setCamSt('✅ YOLO: <strong>' + det + '</strong> box(es) &nbsp;|&nbsp; ' +
+               'Codes: <strong>' + cnt + '</strong> &nbsp;|&nbsp; ' +
+               'Matched: <strong>' + matched + '</strong> &nbsp;|&nbsp; ' +
+               'Shelf: <strong>' + shelf + '</strong>');
+
+      if (books.length === 0) {
+        document.getElementById('scan-results').innerHTML =
+          '<div class="panel" style="text-align:center;padding:30px">' +
+          '<div style="font-size:28px;margin-bottom:8px">🔍</div>' +
+          '<div style="color:var(--muted)">No books detected.<br>Hold the camera closer and make sure stickers are visible.</div></div>';
+        log('Camera live scan: 0 codes', 'lwn'); return;
+      }
+
+      renderScan(books, shelf, d.used_fallback);
+      books.forEach(b => pushMis(b, b.method || 'Camera'));
+      updStats();
+      const el = document.getElementById('s-scan');
+      if (el) el.textContent = 'Live Camera';
+      log('Live scan: ' + cnt + ' codes → ' + matched + ' matched, shelf=' + shelf, 'lok');
+    } catch {
+      setCamSt('❌ Cannot reach Python :5001 — is app.py running?');
+    }
+  }, 'image/jpeg', 0.92);
+}
+
+function setCamSt(msg) {
+  const el = document.getElementById('cam-status');
+  if (el) { el.innerHTML = msg; el.className = msg ? 'show' : ''; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// UPLOAD SCAN
+// ══════════════════════════════════════════════════════════════
+let file = null;
+
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('upzone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) applyFile(f);
+}
+function onFile(inp) { if (inp.files[0]) applyFile(inp.files[0]); }
+function applyFile(f) {
+  file = f;
+  document.getElementById('prev-wrap').style.display = 'block';
+  document.getElementById('prev-img').src = URL.createObjectURL(f);
+  document.getElementById('uptext').textContent = f.name;
+  document.getElementById('ann-wrap').style.display = 'none';
+  document.getElementById('shelf-badge').style.display = 'none';
+  document.getElementById('scan-results').innerHTML = '';
+  setSt('');
+}
+function clearScan() {
+  file = null;
+  document.getElementById('prev-wrap').style.display = 'none';
+  document.getElementById('ann-wrap').style.display = 'none';
+  document.getElementById('shelf-badge').style.display = 'none';
+  document.getElementById('scan-results').innerHTML = '';
+  document.getElementById('uptext').textContent = 'Click or drag a shelf photo here';
+  document.getElementById('imgFile').value = '';
+  setSt('');
+}
+function setSt(msg) {
+  const el = document.getElementById('scan-status');
+  if (el) { el.innerHTML = msg; el.className = msg ? 'show' : ''; }
+}
+
+async function doScan() {
+  if (!file) { alert('Please select an image first'); return; }
+  setSt('<span class="sp"></span> Running YOLO detection + OCR…');
+  document.getElementById('ann-wrap').style.display = 'none';
+  document.getElementById('shelf-badge').style.display = 'none';
+  document.getElementById('scan-results').innerHTML = '';
+
+  try {
+    const fd = new FormData();
+    fd.append('image', file);
+    const r = await fetch(PYTHON + '/process-image', { method: 'POST', body: fd });
+    if (!r.ok) { setSt('❌ Python server error: ' + r.status); return; }
+    const d = await r.json();
+    if (d.error) { setSt('❌ ' + d.error); return; }
+
+    if (d.annotated_image) {
+      document.getElementById('ann-img').src = 'data:image/jpeg;base64,' + d.annotated_image;
+      document.getElementById('ann-wrap').style.display = 'block';
+    }
+    const shelf = d.detectedShelf || 'UNKNOWN';
+    if (shelf !== 'UNKNOWN') {
+      document.getElementById('detected-shelf-val').textContent = shelf;
+      document.getElementById('shelf-badge').style.display = 'block';
+    }
+
+    const books   = d.books || [];
+    const det     = d.detections || 0;
+    const cnt     = (d.codes || []).length;
+    const matched = books.filter(b => b.found).length;
+    const fb      = d.used_fallback
+      ? ' &nbsp;|&nbsp; <span style="color:var(--warn)">⚠️ OCR Fallback</span>' : '';
+
+    setSt('✅ YOLO: <strong>' + det + '</strong> box(es) &nbsp;|&nbsp; ' +
+          'OCR codes: <strong>' + cnt + '</strong> &nbsp;|&nbsp; ' +
+          'Matched: <strong>' + matched + '</strong> &nbsp;|&nbsp; ' +
+          'Auto-shelf: <strong>' + shelf + '</strong>' + fb);
+
+    if (books.length === 0) {
+      document.getElementById('scan-results').innerHTML =
+        '<div class="panel" style="text-align:center;padding:30px">' +
+        '<div style="font-size:28px;margin-bottom:8px">🔍</div>' +
+        '<div style="color:var(--muted)">No books detected.<br>' +
+        'Tips: Use a well-lit photo, hold the camera steady,<br>' +
+        'and make sure the label stickers at the bottom of the book spines are visible.</div>' +
+        '</div>';
+      log('Camera scan: 0 codes detected', 'lwn'); return;
+    }
+
+    renderScan(books, shelf, d.used_fallback);
+    books.forEach(b => pushMis(b, b.method || 'OCR+YOLO'));
+    updStats();
+    const el = document.getElementById('s-scan');
+    if (el) el.textContent = 'Camera';
+    log('Scan: ' + cnt + ' codes → ' + matched + ' matched, ' +
+        books.filter(b => b.status === 'WRONG').length + ' misplaced, shelf=' + shelf, 'lok');
+  } catch (e) {
+    setSt('❌ Cannot reach Python :5001 — is app.py running?');
+  }
+}
+
+// ── SHARED RENDER ─────────────────────────────────────────────
+function renderScan(books, shelf, usedFallback) {
+  const methodNote = usedFallback
+    ? '<span class="bdg b-fb" style="margin-left:8px">OCR Fallback</span>'
+    : '<span class="bdg b-yl" style="margin-left:8px">YOLO+OCR</span>';
+
+  let h = '<h3 style="font-size:15px;font-weight:700;margin-bottom:12px">' +
+    '📊 Results — ' + books.length + ' book(s) detected' + methodNote +
+    '<span style="font-size:12px;font-weight:400;color:var(--muted);display:block;margin-top:4px">' +
+    'Auto-detected shelf: <strong style="color:var(--accent)">' + shelf + '</strong></span></h3>' +
+    '<div class="rgrid">';
+
+  books.forEach(b => {
+    if (!b.found) {
+      h += '<div class="rcard unk">' +
+        '<div class="rt">❓ Unknown Code <span class="bdg b-un">UNKNOWN</span></div>' +
+        '<div class="rm">Code: <strong>' + b.code + '</strong><br>' +
+        'Not found in database</div></div>';
+    } else if (b.status === 'WRONG') {
+      h += '<div class="rcard wrong">' +
+        '<div class="rt">❌ ' + b.title +
+        '<span class="bdg b-wr">MISPLACED</span></div>' +
+        '<div class="rm">' +
+        'Book #: <strong>' + b.code + '</strong><br>' +
+        'Author: <strong>' + (b.author || '—') + '</strong><br>' +
+        'Programme: <strong>' + (b.subject || '—') + '</strong><br>' +
+        'Rack: <strong>' + b.rack + '</strong><br>' +
+        'Expected: <strong style="color:var(--green)">' + b.expectedShelf + '</strong>' +
+        ' &nbsp;|&nbsp; Found on: <strong style="color:var(--red)">' + (b.scannedShelf || shelf) + '</strong>' +
+        '</div></div>';
+    } else {
+      h += '<div class="rcard ok">' +
+        '<div class="rt">✅ ' + b.title +
+        '<span class="bdg b-ok">CORRECT</span></div>' +
+        '<div class="rm">' +
+        'Book #: <strong>' + b.code + '</strong><br>' +
+        'Author: <strong>' + (b.author || '—') + '</strong><br>' +
+        'Programme: <strong>' + (b.subject || '—') + '</strong><br>' +
+        'Rack: <strong>' + b.rack + '</strong> &nbsp;|&nbsp; ' +
+        'Shelf: <strong style="color:var(--green)">' + b.expectedShelf + '</strong>' +
+        '</div></div>';
+    }
+  });
+
+  h += '</div>';
+  document.getElementById('scan-results').innerHTML = h;
+}
+
+// ── RFID SCAN ────────────────────────────────────────────────
+async function doRfid() {
+  const uid   = document.getElementById('r-uid').value.trim().toUpperCase();
+  const shelf = document.getElementById('r-shelf').value.trim().toUpperCase();
+  if (!uid) { alert('Enter RFID UID'); return; }
+
+  const rd = document.getElementById('rfid-result');
+  rd.innerHTML = '<span class="sp"></span> Looking up…';
+
+  try {
+    const r = await fetch(JAVA + '/rfid/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      mode: 'cors',
+      body: JSON.stringify({ uid, shelfId: shelf })
+    });
+    const d = await r.json();
+    renderRfid(d);
+
+    if (d.found) {
+      pushMis({
+        code: d.bookNumber || d.code,
+        title: d.title, author: d.author,
+        subject: d.programme, rack: d.rack,
+        expectedShelf: d.expectedShelf,
+        scannedShelf: d.currentShelf,
+        status: d.status
+      }, 'RFID');
+    }
+    updStats();
+    const el = document.getElementById('s-scan');
+    if (el) el.textContent = 'RFID';
+    const st = d.found ? (d.status === 'OK' ? '✅ OK' : '❌ WRONG') : '⚠️ UNKNOWN';
+    log('RFID: ' + uid + ' → ' + st, d.found && d.status === 'OK' ? 'lok' : 'lwr');
+    rfidLog(uid, shelf, st);
+  } catch {
+    rd.innerHTML = '<div style="color:var(--red);font-size:13px">❌ Java backend offline — is Spring Boot running?</div>';
+  }
+}
+
+function renderRfid(d) {
+  const div = document.getElementById('rfid-result');
+  if (!d.found) {
+    div.innerHTML =
+      '<div class="rcard unk" style="margin-top:14px">' +
+      '<div class="rt">⚠️ Not Registered <span class="bdg b-rfid">RFID</span></div>' +
+      '<div class="rm">UID: <strong>' + d.uid + '</strong><br>' +
+      'No RFID sticker assigned yet</div></div>';
+    return;
+  }
+  const ok = d.status === 'OK';
+  div.innerHTML =
+    '<div class="rcard ' + (ok ? 'ok' : 'wrong') + '" style="margin-top:14px">' +
+    '<div class="rt">' + (ok ? '✅' : '❌') + ' ' + d.title +
+    '<span class="bdg ' + (ok ? 'b-ok' : 'b-wr') + '">' + (ok ? 'CORRECT' : 'WRONG SHELF') + '</span>' +
+    '<span class="bdg b-rfid">RFID</span></div>' +
+    '<div class="rm">' +
+    'UID: <strong>' + d.uid + '</strong><br>' +
+    'Book #: <strong>' + (d.bookNumber || d.code || '—') + '</strong> &nbsp;|&nbsp; Rack: <strong>' + d.rack + '</strong><br>' +
+    (d.author    ? 'Author: <strong>' + d.author + '</strong><br>' : '') +
+    (d.programme ? 'Programme: <strong>' + d.programme + '</strong><br>' : '') +
+    'Expected: <strong style="color:var(--green)">' + d.expectedShelf + '</strong>' +
+    ' &nbsp;|&nbsp; Scanned: <strong style="color:' + (ok ? 'var(--green)' : 'var(--red)') + '">' + d.currentShelf + '</strong>' +
+    '</div></div>';
+}
+
+// ── MISPLACED BOOKS ──────────────────────────────────────────
+let misRows = [];
+function pushMis(b, method) {
+  if (!b.code && !b.bookNumber) return;
+  const key = (b.code || b.bookNumber) + '|' + method;
+  if (misRows.find(r => (r.code || r.bookNumber) + '|' + r.method === key)) return;
+  misRows.push({ ...b, method });
+  renderMis();
+}
+function clearMis() { misRows = []; renderMis(); updStats(); }
+function renderMis() {
+  const emp = document.getElementById('mis-empty');
+  const con = document.getElementById('mis-content');
+  if (!misRows.length) { emp.style.display = 'block'; con.style.display = 'none'; return; }
+  emp.style.display = 'none'; con.style.display = 'block';
+
+  let rows = '';
+  misRows.forEach(r => {
+    const ok = r.status === 'OK';
+    rows += '<tr>' +
+      '<td>' + (r.title || '—') + '</td>' +
+      '<td><code>' + (r.code || r.bookNumber || '—') + '</code></td>' +
+      '<td>' + (r.author || '—') + '</td>' +
+      '<td>' + (r.subject || r.programme || '—') + '</td>' +
+      '<td><span class="bdg ' + (r.method === 'RFID' ? 'b-rfid' : 'b-yl') + '">' + r.method + '</span></td>' +
+      '<td>' + (r.scannedShelf || r.currentShelf || '—') + '</td>' +
+      '<td>' + (r.expectedShelf || '—') + '</td>' +
+      '<td>' + (r.rack || '—') + '</td>' +
+      '<td class="' + (ok ? 'tok' : 'twr') + '">' + (ok ? '✅' : '❌') + ' ' + r.status + '</td>' +
+      '</tr>';
+  });
+  document.getElementById('mis-tbody').innerHTML = rows;
+
+  let alerts = '';
+  misRows.filter(r => r.status === 'WRONG').forEach(r => {
+    alerts += '<div class="abox danger">' +
+      '<div class="ai">🚨</div>' +
+      '<div><div class="at">Misplaced: ' + (r.title || r.code || r.bookNumber) + '</div>' +
+      '<div class="ab">' +
+      'Book <strong>' + (r.code || r.bookNumber) + '</strong> found on shelf ' +
+      '<strong>' + (r.scannedShelf || r.currentShelf) + '</strong> ' +
+      'but belongs on <strong>' + r.expectedShelf + '</strong> (' + (r.rack || '') + ').<br>' +
+      (r.author ? 'Author: <strong>' + r.author + '</strong><br>' : '') +
+      'Method: <strong>' + r.method + '</strong>' +
+      '</div></div></div>';
+  });
+  document.getElementById('mis-alerts').innerHTML = alerts;
+}
+
+// ── SHELF MAP ────────────────────────────────────────────────
+const SHELVES = [
+  { id: 'A1', cat: 'Mathematics',              n: 700,  cap: 800  },
+  { id: 'A2', cat: 'Physics',                  n: 136,  cap: 200  },
+  { id: 'A3', cat: 'Chemistry',                n: 718,  cap: 800  },
+  { id: 'B1', cat: 'Biotechnology',            n: 749,  cap: 800  },
+  { id: 'B2', cat: 'Computer Engineering',     n: 813,  cap: 900  },
+  { id: 'B3', cat: 'Mechanical Engineering',   n: 1639, cap: 1700 },
+  { id: 'C1', cat: 'Chemical Engineering',     n: 814,  cap: 900  },
+  { id: 'C2', cat: 'Civil / Fire Safety',      n: 742,  cap: 900  },
+  { id: 'C3', cat: 'Management',               n: 1501, cap: 1600 },
+  { id: 'D1', cat: 'General / Law / Skills',   n: 484,  cap: 600  },
+  { id: 'D2', cat: 'Start-up / SSIP',          n: 34,   cap: 100  },
+];
+function loadShelves() {
+  document.getElementById('shgrid').innerHTML = SHELVES.map(s =>
+    '<div class="shcard">' +
+    '<div class="shid">' + s.id + '</div>' +
+    '<div class="shcat">' + s.cat + '</div>' +
+    '<div class="shbar"><div class="shfill" style="width:' + Math.round(s.n / s.cap * 100) + '%"></div></div>' +
+    '<div class="shcnt">' + s.n + ' books</div>' +
+    '</div>'
+  ).join('');
+}
+
+// ── RFID REGISTRY ────────────────────────────────────────────
+async function loadReg() {
+  const w = document.getElementById('reg-wrap');
+  w.innerHTML = '<span class="sp"></span> Loading from MySQL…';
+  try {
+    const r = await fetch(JAVA + '/rfid/books', { mode: 'cors' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const books = await r.json();
+    if (!books.length) {
+      w.innerHTML = '<p style="color:var(--muted);font-size:13px">No books. Run setup_database.sql in MySQL Workbench first.</p>';
+      return;
+    }
+    let h = '<table class="dt"><thead><tr>' +
+      '<th>RFID UID</th><th>Book #</th><th>Title</th><th>Author</th>' +
+      '<th>Programme</th><th>Rack</th><th>Expected Shelf</th>' +
+      '</tr></thead><tbody>';
+    books.forEach(b => {
+      h += '<tr>' +
+        '<td><code style="color:var(--accent)">' + (b.uid || b.rfidUid || '—') + '</code></td>' +
+        '<td><code>' + (b.bookNumber || b.code || '—') + '</code></td>' +
+        '<td>' + (b.title || '—') + '</td>' +
+        '<td>' + (b.author || '—') + '</td>' +
+        '<td>' + (b.programme || '—') + '</td>' +
+        '<td>' + (b.rack || '—') + '</td>' +
+        '<td><span class="bdg b-rfid">' + (b.expectedShelf || '—') + '</span></td>' +
+        '</tr>';
+    });
+    h += '</tbody></table>';
+    w.innerHTML = h;
+  } catch {
+    w.innerHTML = '<p style="color:var(--red);font-size:13px">❌ Java backend offline — make sure Spring Boot is running on :8080</p>';
+  }
+}
+
+// ── LOGS ─────────────────────────────────────────────────────
+function log(msg, cls) {
+  cls = cls || 'lin';
+  const t  = new Date().toLocaleTimeString();
+  const el = document.createElement('div');
+  el.className = 'le ' + cls;
+  el.textContent = t + '  ' + msg;
+  const l = document.getElementById('home-log');
+  if (l) { l.prepend(el); while (l.children.length > 40) l.removeChild(l.lastChild); }
+}
+function rfidLog(uid, shelf, status) {
+  const l  = document.getElementById('rfid-log');
+  const t  = new Date().toLocaleTimeString();
+  const el = document.createElement('div');
+  el.className = 'le ' + (status.includes('OK') ? 'lok' : 'lwr');
+  el.textContent = t + '  UID:' + uid + '  Shelf:' + shelf + '  → ' + status;
+  if (l) { l.prepend(el); while (l.children.length > 20) l.removeChild(l.lastChild); }
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+function init() {
+  initClock();
+  chkHealth();
+  _healthInterval = setInterval(chkHealth, 15000);
+  loadStats();
+  loadShelves();
+  log('Admin logged in', 'lin');
+}
+</script>
+</body>
+</html>
